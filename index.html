@@ -1,0 +1,1323 @@
+  <!DOCTYPE html>
+<html lang="vi" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vật Lí 12: Quá Trình Đẳng Nhiệt & Đẳng Áp - Thầy PGT</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- MathJax for Standard LaTeX Rendering -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        edu: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            border: '#334155',
+                            primary: '#3b82f6',
+                            secondary: '#06b6d4',
+                            accent: '#f59e0b'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        /* Custom Range Slider */
+        input[type=range] {
+            -webkit-appearance: none;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #38bdf8;
+            cursor: pointer;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+            transition: transform 0.15s ease;
+        }
+        input[type=range]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #334155;
+            border-radius: 4px;
+        }
+        /* Drag & Drop styles */
+        .draggable-item {
+            touch-action: none;
+            user-select: none;
+        }
+        .drop-zone.drag-over {
+            border-color: #38bdf8;
+            background-color: rgba(56, 189, 248, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-atom text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-300">
+                        VẬT LÍ 12: KHÍ LÍ TƯỞNG
+                    </h1>
+                    <p class="text-xs text-slate-400">Quá trình Đẳng nhiệt (Boyle) & Đẳng áp (Charles)</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex bg-slate-800 p-1 rounded-xl border border-slate-700 w-full sm:w-auto justify-around sm:justify-start">
+                <button onclick="switchTab('sim')" id="tab-sim" class="tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-600 text-white shadow">
+                    <i class="fa-solid fa-flask mr-1.5"></i>Mô Phỏng & Đồ Thị
+                </button>
+                <button onclick="switchTab('game')" id="tab-game" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition-all">
+                    <i class="fa-solid fa-gamepad mr-1.5"></i>Trò Chơi Củng Cố
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        
+        <!-- SECTION 1 & 2: SIMULATION & DYNAMIC CHARTS -->
+        <div id="view-sim" class="space-y-6">
+            
+            <!-- Process Selector Banner -->
+            <div class="bg-slate-800/80 border border-slate-700 rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                        Chế độ khảo sát
+                    </span>
+                    <p id="process-desc" class="text-sm text-slate-300 font-medium">
+                        Định luật Boyle: Khi nhiệt độ không đổi, áp suất tỉ lệ nghịch với thể tích ($p \cdot V = \text{hằng số}$).
+                    </p>
+                </div>
+                <div class="flex bg-slate-900 p-1.5 rounded-xl border border-slate-700 w-full md:w-auto">
+                    <button onclick="setProcessMode('isothermal')" id="btn-isothermal" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold bg-cyan-600 text-white shadow transition-all">
+                        Đẳng Nhiệt ($T = \text{const}$)
+                    </button>
+                    <button onclick="setProcessMode('isobaric')" id="btn-isobaric" class="flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all">
+                        Đẳng Áp ($p = \text{const}$)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid: Simulation Cylinder + Dynamic Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Left Column: Interactive Cylinder Simulation (5 cols) -->
+                <div class="lg:col-span-5 bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <h2 class="text-base font-bold text-cyan-400 flex items-center gap-2">
+                                <i class="fa-solid fa-vial"></i> Buồng Khí Lí Tưởng ($n = 1\text{ mol}$)
+                            </h2>
+                            <button onclick="resetSimulation()" class="text-xs bg-slate-700 hover:bg-slate-600 text-slate-200 px-3 py-1.5 rounded-lg transition">
+                                <i class="fa-solid fa-rotate-right mr-1"></i>Đặt lại
+                            </button>
+                        </div>
+
+                        <!-- Canvas Container for Gas Particles & Piston -->
+                        <div class="relative w-full h-64 sm:h-72 bg-slate-900 rounded-xl border-2 border-slate-700 overflow-hidden mb-5 flex items-center justify-center">
+                            <canvas id="gasCanvas" class="w-full h-full block"></canvas>
+                            <!-- Pressure Gauge Overlay -->
+                            <div class="absolute top-3 right-3 bg-slate-800/90 backdrop-blur border border-slate-600 rounded-xl px-3 py-2 text-right shadow-lg">
+                                <div class="text-[11px] text-slate-400 uppercase font-semibold">Áp suất ($p$)</div>
+                                <div class="text-lg font-extrabold text-amber-400"><span id="disp-p">1.00</span> <span class="text-xs font-normal text-slate-300">atm</span></div>
+                            </div>
+                            <!-- Temperature Flame/Ice Indicator -->
+                            <div id="thermal-indicator" class="absolute bottom-2 left-3 text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                                <i class="fa-solid fa-temperature-half mr-1"></i> <span id="disp-t-c">27</span> °C (<span id="disp-t-k">300</span> K)
+                            </div>
+                        </div>
+
+                        <!-- State Parameters Readout -->
+                        <div class="grid grid-cols-3 gap-2 mb-5 text-center">
+                            <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80">
+                                <div class="text-xs text-slate-400">Thể tích ($V$)</div>
+                                <div class="text-base font-bold text-cyan-400"><span id="val-v">24.6</span> L</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80">
+                                <div class="text-xs text-slate-400">Nhiệt độ ($T$)</div>
+                                <div class="text-base font-bold text-rose-400"><span id="val-t">300</span> K</div>
+                            </div>
+                            <div class="bg-slate-900/80 p-2.5 rounded-xl border border-slate-700/80">
+                                <div class="text-xs text-slate-400">Áp suất ($p$)</div>
+                                <div class="text-base font-bold text-amber-400"><span id="val-p">1.00</span> atm</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sliders Controls -->
+                    <div class="space-y-4 bg-slate-900/60 p-4 rounded-xl border border-slate-700/60">
+                        <!-- Volume Slider -->
+                        <div id="ctrl-v-group">
+                            <div class="flex justify-between text-sm mb-1.5">
+                                <label for="slider-v" class="font-semibold text-cyan-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-expand"></i> Thể tích $V$ (Lít)
+                                </label>
+                                <span id="lock-v-badge" class="hidden text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded">Tự động theo $T$</span>
+                            </div>
+                            <input type="range" id="slider-v" min="10" max="50" step="0.5" value="24.6" class="w-full">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>10 L</span>
+                                <span>30 L</span>
+                                <span>50 L</span>
+                            </div>
+                        </div>
+
+                        <!-- Temperature Slider -->
+                        <div id="ctrl-t-group">
+                            <div class="flex justify-between text-sm mb-1.5">
+                                <label for="slider-t" class="font-semibold text-rose-400 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-fire"></i> Nhiệt độ tuyệt đối $T$ (Kelvin)
+                                </label>
+                                <span id="lock-t-badge" class="text-xs bg-cyan-900/60 text-cyan-300 border border-cyan-700 px-2 py-0.5 rounded">Cố định (Đẳng nhiệt)</span>
+                            </div>
+                            <input type="range" id="slider-t" min="150" max="600" step="10" value="300" disabled class="w-full opacity-50 cursor-not-allowed">
+                            <div class="flex justify-between text-[11px] text-slate-500 mt-1">
+                                <span>150 K (-123°C)</span>
+                                <span>375 K</span>
+                                <span>600 K (327°C)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Dynamic Graphs (7 cols) -->
+                <div class="lg:col-span-7 bg-slate-800 border border-slate-700 rounded-2xl p-5 flex flex-col justify-between shadow-xl">
+                    <div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                            <h2 class="text-base font-bold text-blue-400 flex items-center gap-2">
+                                <i class="fa-solid fa-chart-line"></i> Đồ Thị Biến Đổi Trạng Thái
+                            </h2>
+                            <!-- Coordinate System Selector -->
+                            <div class="flex flex-wrap gap-1.5 bg-slate-900 p-1 rounded-xl border border-slate-700">
+                                <button onclick="setChartType('pV')" id="chart-btn-pV" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition">
+                                    Hệ (pOV)
+                                </button>
+                                <button onclick="setChartType('VT')" id="chart-btn-VT" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+                                    Hệ (VOT)
+                                </button>
+                                <button onclick="setChartType('pt')" id="chart-btn-pt" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+                                    Hệ (pOt)
+                                </button>
+                                <button onclick="setChartType('Vt')" id="chart-btn-Vt" class="chart-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+                                    Hệ (VOt)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Chart Canvas Wrapper -->
+                        <div class="relative w-full h-72 sm:h-80 bg-slate-900/90 rounded-xl border border-slate-700 p-3">
+                            <canvas id="physicsChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic Graph Explanation Card -->
+                    <div class="mt-4 bg-blue-950/40 border border-blue-800/50 rounded-xl p-4">
+                        <h3 id="chart-info-title" class="text-sm font-bold text-cyan-300 mb-1">
+                            Đường đẳng nhiệt trong hệ tọa độ (pOV)
+                        </h3>
+                        <p id="chart-info-desc" class="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                            Trong hệ tọa độ (pOV), đường đẳng nhiệt là một nhánh của đường <strong>Hyperbol</strong>. Điểm chấm đỏ biểu diễn trạng thái hiện tại của khối khí đang di chuyển dọc theo đường cong khi bạn thay đổi thể tích.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: INTERACTIVE EDUCATIONAL GAME -->
+        <div id="view-game" class="hidden space-y-6">
+            
+            <!-- Game Header & Status Bar -->
+            <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-xl font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-trophy text-amber-400"></i> Thử Thách Chinh Phục Chất Khí
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">Hoàn thành 3 vòng chơi: Trắc nghiệm nhanh, Kéo thả ghép nối và Điền khuyết công thức.</p>
+                </div>
+
+                <div class="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <!-- Timer -->
+                    <div class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-2.5">
+                        <i class="fa-solid fa-stopwatch text-rose-400 text-lg"></i>
+                        <div>
+                            <div class="text-[10px] text-slate-400 uppercase font-bold">Thời gian</div>
+                            <div id="game-timer" class="text-base font-extrabold text-white font-mono">03:00</div>
+                        </div>
+                    </div>
+                    <!-- Score -->
+                    <div class="bg-slate-900 border border-slate-700 px-4 py-2 rounded-xl flex items-center gap-2.5">
+                        <i class="fa-solid fa-star text-amber-400 text-lg"></i>
+                        <div>
+                            <div class="text-[10px] text-slate-400 uppercase font-bold">Điểm số</div>
+                            <div id="game-score" class="text-base font-extrabold text-amber-400 font-mono">0 / 100</div>
+                        </div>
+                    </div>
+                    <!-- Restart Game -->
+                    <button onclick="initGame()" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-600/30 transition">
+                        <i class="fa-solid fa-play mr-1"></i> Chơi mới
+                    </button>
+                </div>
+            </div>
+
+            <!-- Game Stages Navigation -->
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="switchGameStage(1)" id="stage-btn-1" class="stage-btn p-3 rounded-xl border-2 border-cyan-500 bg-slate-800 text-left transition">
+                    <div class="text-xs font-bold text-cyan-400">VÒNG 1 (40đ)</div>
+                    <div class="text-sm font-bold text-white truncate">Trắc Nghiệm Nhanh</div>
+                </button>
+                <button onclick="switchGameStage(2)" id="stage-btn-2" class="stage-btn p-3 rounded-xl border border-slate-700 bg-slate-800/60 text-left transition">
+                    <div class="text-xs font-bold text-slate-400">VÒNG 2 (30đ)</div>
+                    <div class="text-sm font-bold text-slate-300 truncate">Ghép Nối Đồ Thị</div>
+                </button>
+                <button onclick="switchGameStage(3)" id="stage-btn-3" class="stage-btn p-3 rounded-xl border border-slate-700 bg-slate-800/60 text-left transition">
+                    <div class="text-xs font-bold text-slate-400">VÒNG 3 (30đ)</div>
+                    <div class="text-sm font-bold text-slate-300 truncate">Điền Khuyết Tư Duy</div>
+                </button>
+            </div>
+
+            <!-- STAGE 1: MULTIPLE CHOICE -->
+            <div id="game-stage-1" class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-4">
+                    <span class="text-xs font-bold px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300">Câu hỏi <span id="mc-current">1</span> / 4</span>
+                    <span class="text-xs text-slate-400">Mỗi câu đúng +10 điểm</span>
+                </div>
+                <h3 id="mc-question" class="text-base sm:text-lg font-bold text-white mb-5 leading-relaxed">
+                    Đang tải câu hỏi...
+                </h3>
+                <div id="mc-options" class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
+                    <!-- Options injected via JS -->
+                </div>
+                <div id="mc-feedback" class="hidden p-3.5 rounded-xl text-sm font-medium mb-4"></div>
+                <div class="flex justify-end">
+                    <button id="mc-next-btn" onclick="nextMCQuestion()" class="hidden bg-cyan-600 hover:bg-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition">
+                        Tiếp theo <i class="fa-solid fa-arrow-right ml-1.5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STAGE 2: DRAG & DROP / CLICK-TO-PAIR MATCHING -->
+            <div id="game-stage-2" class="hidden bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <div class="mb-4">
+                    <h3 class="text-base sm:text-lg font-bold text-white">Ghép nối đặc điểm với đúng hệ tọa độ & quá trình</h3>
+                    <p class="text-xs text-slate-400 mt-1">Kéo thẻ ở cột trái thả vào ô tương ứng bên phải (hoặc chạm vào thẻ rồi chạm vào ô đích trên điện thoại).</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Source Draggables -->
+                    <div class="space-y-3">
+                        <div class="text-xs font-bold uppercase text-cyan-400 tracking-wider">Các thẻ đặc điểm</div>
+                        <div id="drag-items-container" class="space-y-2.5">
+                            <!-- Draggable cards injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Drop Targets -->
+                    <div class="space-y-3">
+                        <div class="text-xs font-bold uppercase text-amber-400 tracking-wider">Khái niệm tương ứng</div>
+                        <div id="drop-zones-container" class="space-y-2.5">
+                            <!-- Drop zones injected via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+                    <div id="dnd-feedback" class="text-sm font-semibold"></div>
+                    <button id="dnd-check-btn" onclick="checkDragAndDrop()" class="bg-amber-500 hover:bg-amber-400 text-slate-900 px-5 py-2.5 rounded-xl text-sm font-extrabold shadow-lg transition">
+                        <i class="fa-solid fa-check-double mr-1.5"></i> Kiểm Tra Kết Quả
+                    </button>
+                </div>
+            </div>
+
+            <!-- STAGE 3: FILL IN THE BLANKS -->
+            <div id="game-stage-3" class="hidden bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl">
+                <div class="mb-4">
+                    <h3 class="text-base sm:text-lg font-bold text-white">Điền từ / giá trị thích hợp vào chỗ trống</h3>
+                    <p class="text-xs text-slate-400 mt-1">Hoàn thành các phát biểu vật lí sau (Mỗi ô đúng +10 điểm).</p>
+                </div>
+
+                <div class="space-y-4 text-sm sm:text-base text-slate-200 leading-loose bg-slate-900/70 p-5 rounded-xl border border-slate-700">
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700/60">
+                        1. Trong quá trình đẳng nhiệt của một lượng khí nhất định, áp suất 
+                        <select id="blank-1" class="bg-slate-900 border border-cyan-500 text-cyan-300 font-bold rounded-lg px-2.5 py-1 mx-1 focus:outline-none">
+                            <option value="">-- chọn --</option>
+                            <option value="thuan">tỉ lệ thuận</option>
+                            <option value="nghich">tỉ lệ nghịch</option>
+                            <option value="khongdoi">không đổi</option>
+                        </select> với thể tích.
+                    </div>
+
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700/60">
+                        2. Trong hệ tọa độ $(VOT)$, đường đẳng áp là đường thẳng kéo dài đi qua 
+                        <select id="blank-2" class="bg-slate-900 border border-cyan-500 text-cyan-300 font-bold rounded-lg px-2.5 py-1 mx-1 focus:outline-none">
+                            <option value="">-- chọn --</option>
+                            <option value="gốc tọa độ">gốc tọa độ O</option>
+                            <option value="trục tung">trục tung OV</option>
+                            <option value="trục hoành">trục hoành OT</option>
+                        </select>.
+                    </div>
+
+                    <div class="p-3 bg-slate-800/80 rounded-lg border border-slate-700/60">
+                        3. Một khối khí ở $27^\circ\text{C}$ có thể tích $10\text{ lít}$. Khi đun nóng đẳng áp đến $327^\circ\text{C}$ ($600\text{ K}$), thể tích của khối khí sẽ bằng 
+                        <input type="number" id="blank-3" placeholder="?" class="w-20 bg-slate-900 border border-cyan-500 text-amber-400 font-bold text-center rounded-lg px-2 py-1 mx-1 focus:outline-none">
+                        $\text{lít}$.
+                    </div>
+                </div>
+
+                <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+                    <div id="blank-feedback" class="text-sm font-semibold"></div>
+                    <button id="blank-check-btn" onclick="checkFillBlanks()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-5 py-2.5 rounded-xl text-sm font-extrabold shadow-lg transition">
+                        <i class="fa-solid fa-paper-plane mr-1.5"></i> Nộp Bài Vòng 3
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Summary Modal Banner (Hidden until finished) -->
+            <div id="game-summary" class="hidden bg-gradient-to-r from-blue-900/90 to-cyan-900/90 border border-cyan-500/50 rounded-2xl p-6 text-center shadow-2xl">
+                <div class="w-16 h-16 mx-auto bg-amber-400/20 border border-amber-400 rounded-full flex items-center justify-center mb-3">
+                    <i class="fa-solid fa-crown text-3xl text-amber-400"></i>
+                </div>
+                <h3 class="text-2xl font-extrabold text-white mb-1">Hoàn Thành Thử Thách!</h3>
+                <p id="summary-text" class="text-cyan-200 text-sm mb-4">Bạn đã xuất sắc vượt qua bài kiểm tra tương tác.</p>
+                <button onclick="initGame()" class="bg-white text-slate-900 hover:bg-cyan-100 font-bold px-6 py-2.5 rounded-xl text-sm shadow transition">
+                    Thử sức lại từ đầu
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Custom Toast Notification Box (Replaces alert) -->
+    <div id="toast-box" class="fixed bottom-16 right-4 z-50 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-slate-800 border border-cyan-500 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 text-sm font-medium">
+            <i class="fa-solid fa-circle-info text-cyan-400"></i>
+            <span id="toast-msg">Thông báo</span>
+        </div>
+    </div>
+
+    <!-- Footer with Copyright -->
+    <footer class="bg-slate-950 border-t border-slate-800 py-4 px-4 mt-8">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+            <div>
+                Ứng dụng mô phỏng & tương tác môn Vật lí 12 - Chương trình GDPT 2018
+            </div>
+            <div class="font-bold text-cyan-400 tracking-wide bg-slate-900 px-3 py-1 rounded-full border border-slate-800">
+                <i class="fa-solid fa-copyright mr-1"></i> Bản quyền: Thầy PGT - THPT La Gi
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // ==========================================
+        // 1. STATE MANAGEMENT & PHYSICS CONSTANTS
+        // ==========================================
+        const R_CONST = 0.082; // L.atm / (mol.K)
+        const MOLES = 1.0;
+
+        let state = {
+            mode: 'isothermal', // 'isothermal' | 'isobaric'
+            chartType: 'pV',    // 'pV' | 'VT' | 'pt' | 'Vt'
+            V: 24.6,            // Liters (10 to 50)
+            T: 300,             // Kelvin (150 to 600)
+            p: 1.00             // atm
+        };
+
+        // DOM Elements
+        const sliderV = document.getElementById('slider-v');
+        const sliderT = document.getElementById('slider-t');
+        const dispP = document.getElementById('disp-p');
+        const dispTC = document.getElementById('disp-t-c');
+        const dispTK = document.getElementById('disp-t-k');
+        const valV = document.getElementById('val-v');
+        const valT = document.getElementById('val-t');
+        const valP = document.getElementById('val-p');
+
+        // Toast Helper
+        function showToast(msg) {
+            const toast = document.getElementById('toast-box');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        // MathJax Re-render Helper
+        function renderMath() {
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                window.MathJax.typesetPromise().catch((err) => console.warn(err));
+            }
+        }
+
+        // Tab Switching (Simulation vs Game)
+        function switchTab(tab) {
+            const viewSim = document.getElementById('view-sim');
+            const viewGame = document.getElementById('view-game');
+            const btnSim = document.getElementById('tab-sim');
+            const btnGame = document.getElementById('tab-game');
+
+            if (tab === 'sim') {
+                viewSim.classList.remove('hidden');
+                viewGame.classList.add('hidden');
+                btnSim.className = "tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-600 text-white shadow";
+                btnGame.className = "tab-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition-all";
+                resizeGasCanvas();
+            } else {
+                viewSim.classList.add('hidden');
+                viewGame.classList.remove('hidden');
+                btnGame.className = "tab-btn active px-4 py-2 rounded-lg text-sm font-semibold transition-all bg-blue-600 text-white shadow";
+                btnSim.className = "tab-btn px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:text-white transition-all";
+                if (!gameState.started) {
+                    initGame();
+                }
+            }
+            renderMath();
+        }
+
+        // Process Mode Switching (Isothermal vs Isobaric)
+        function setProcessMode(mode) {
+            state.mode = mode;
+            const btnIsoT = document.getElementById('btn-isothermal');
+            const btnIsoP = document.getElementById('btn-isobaric');
+            const desc = document.getElementById('process-desc');
+            const lockV = document.getElementById('lock-v-badge');
+            const lockT = document.getElementById('lock-t-badge');
+
+            if (mode === 'isothermal') {
+                btnIsoT.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold bg-cyan-600 text-white shadow transition-all";
+                btnIsoP.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all";
+                desc.innerHTML = 'Định luật Boyle: Khi nhiệt độ không đổi, áp suất tỉ lệ nghịch với thể tích ($p \\cdot V = \\text{hằng số}$).';
+                
+                sliderV.disabled = false;
+                sliderV.classList.remove('opacity-50', 'cursor-not-allowed');
+                lockV.classList.add('hidden');
+
+                sliderT.disabled = true;
+                sliderT.classList.add('opacity-50', 'cursor-not-allowed');
+                lockT.classList.remove('hidden');
+            } else {
+                btnIsoP.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold bg-amber-600 text-white shadow transition-all";
+                btnIsoT.className = "flex-1 md:flex-none px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white transition-all";
+                desc.innerHTML = 'Định luật Charles: Khi áp suất không đổi, thể tích tỉ lệ thuận với nhiệt độ tuyệt đối ($\\frac{V}{T} = \\text{hằng số}$).';
+
+                sliderT.disabled = false;
+                sliderT.classList.remove('opacity-50', 'cursor-not-allowed');
+                lockT.classList.add('hidden');
+
+                sliderV.disabled = true;
+                sliderV.classList.add('opacity-50', 'cursor-not-allowed');
+                lockV.classList.remove('hidden');
+                
+                // Ensure T stays within valid V range
+                state.T = Math.round((state.p * state.V) / (MOLES * R_CONST));
+                sliderT.value = state.T;
+                sliderV.value = state.V;
+            }
+            updateUIAndChart();
+            renderMath();
+        }
+
+        function resetSimulation() {
+            state.V = 24.6;
+            state.T = 300;
+            state.p = 1.00;
+            sliderV.value = 24.6;
+            sliderT.value = 300;
+            updateUIAndChart();
+            showToast("Đã đặt lại trạng thái chuẩn (1 atm, 27°C, 24.6 L)");
+        }
+
+        // Slider Event Listeners
+        sliderV.addEventListener('input', (e) => {
+            if (state.mode !== 'isothermal') return;
+            state.V = parseFloat(e.target.value);
+            state.p = (MOLES * R_CONST * state.T) / state.V;
+            updateUIAndChart();
+        });
+
+        sliderT.addEventListener('input', (e) => {
+            if (state.mode !== 'isobaric') return;
+            let newT = parseFloat(e.target.value);
+            let newV = (MOLES * R_CONST * newT) / state.p;
+            
+            // Clamp V between 10L and 50L
+            if (newV < 10) {
+                newV = 10;
+                newT = Math.round((state.p * newV) / (MOLES * R_CONST));
+                sliderT.value = newT;
+            } else if (newV > 50) {
+                newV = 50;
+                newT = Math.round((state.p * newV) / (MOLES * R_CONST));
+                sliderT.value = newT;
+            }
+            
+            state.T = newT;
+            state.V = newV;
+            sliderV.value = state.V;
+            updateUIAndChart();
+        });
+
+        function updateUIAndChart() {
+            dispP.innerText = state.p.toFixed(2);
+            valP.innerText = state.p.toFixed(2);
+            valV.innerText = state.V.toFixed(1);
+            valT.innerText = Math.round(state.T);
+            dispTK.innerText = Math.round(state.T);
+            dispTC.innerText = Math.round(state.T - 273);
+
+            // Update thermal indicator badge color
+            const thermBadge = document.getElementById('thermal-indicator');
+            if (state.T < 273) {
+                thermBadge.className = "absolute bottom-2 left-3 text-xs font-semibold px-2.5 py-1 rounded-md bg-cyan-500/20 text-cyan-300 border border-cyan-500/30";
+            } else if (state.T > 373) {
+                thermBadge.className = "absolute bottom-2 left-3 text-xs font-semibold px-2.5 py-1 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/30";
+            } else {
+                thermBadge.className = "absolute bottom-2 left-3 text-xs font-semibold px-2.5 py-1 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30";
+            }
+
+            updateChartData();
+        }
+
+        // ==========================================
+        // 2. PARTICLE & PISTON CANVAS ANIMATION
+        // ==========================================
+        const canvas = document.getElementById('gasCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        const NUM_PARTICLES = 45;
+
+        function resizeGasCanvas() {
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < NUM_PARTICLES; i++) {
+                particles.push({
+                    x: Math.random() * 150 + 30,
+                    y: Math.random() * 150 + 30,
+                    vx: (Math.random() - 0.5) * 2,
+                    vy: (Math.random() - 0.5) * 2,
+                    radius: 4
+                });
+            }
+        }
+
+        function animateGas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const margin = 20;
+            const cylTop = 30;
+            const cylBottom = canvas.height - 40;
+            const cylHeight = cylBottom - cylTop;
+            const cylLeft = 25;
+            const maxCylWidth = canvas.width - 70;
+
+            // Map Volume (10L -> 50L) to Piston X position
+            const minWidth = maxCylWidth * 0.22;
+            const currentWidth = minWidth + ((state.V - 10) / 40) * (maxCylWidth - minWidth);
+            const pistonX = cylLeft + currentWidth;
+
+            // Speed factor proportional to sqrt(T)
+            const speedMultiplier = Math.sqrt(state.T / 300) * 2.2;
+
+            // Draw Gas Chamber Background Glow based on Temperature
+            const tempRatio = (state.T - 150) / 450; // 0 to 1
+            const rCol = Math.round(56 + tempRatio * 190);
+            const gCol = Math.round(189 - tempRatio * 120);
+            const bCol = Math.round(248 - tempRatio * 200);
+            ctx.fillStyle = `rgba(${rCol}, ${gCol}, ${bCol}, 0.12)`;
+            ctx.fillRect(cylLeft, cylTop, currentWidth, cylHeight);
+
+            // Update and Draw Gas Molecules
+            ctx.fillStyle = `rgb(${rCol}, ${gCol}, ${bCol})`;
+            particles.forEach(p => {
+                p.x += p.vx * speedMultiplier;
+                p.y += p.vy * speedMultiplier;
+
+                // Wall collisions
+                if (p.x - p.radius < cylLeft) {
+                    p.x = cylLeft + p.radius;
+                    p.vx *= -1;
+                }
+                if (p.x + p.radius > pistonX) {
+                    p.x = pistonX - p.radius;
+                    p.vx *= -1;
+                }
+                if (p.y - p.radius < cylTop) {
+                    p.y = cylTop + p.radius;
+                    p.vy *= -1;
+                }
+                if (p.y + p.radius > cylBottom) {
+                    p.y = cylBottom - p.radius;
+                    p.vy *= -1;
+                }
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw Cylinder Walls (U-shape open on right)
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(cylLeft + maxCylWidth + 10, cylTop);
+            ctx.lineTo(cylLeft, cylTop);
+            ctx.lineTo(cylLeft, cylBottom);
+            ctx.lineTo(cylLeft + maxCylWidth + 10, cylBottom);
+            ctx.stroke();
+
+            // Draw Movable Piston
+            ctx.fillStyle = '#475569';
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 2;
+            ctx.fillRect(pistonX, cylTop + 2, 16, cylHeight - 4);
+            ctx.strokeRect(pistonX, cylTop + 2, 16, cylHeight - 4);
+
+            // Piston Rod
+            ctx.fillStyle = '#64748b';
+            ctx.fillRect(pistonX + 16, cylTop + cylHeight / 2 - 6, canvas.width - pistonX, 12);
+
+            requestAnimationFrame(animateGas);
+        }
+
+        // ==========================================
+        // 3. DYNAMIC CHART.JS GRAPHING
+        // ==========================================
+        let physicsChart = null;
+
+        function initChart() {
+            const chartCtx = document.getElementById('physicsChart').getContext('2d');
+            physicsChart = new Chart(chartCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Đường đẳng quá trình',
+                            data: [],
+                            showLine: true,
+                            borderColor: '#38bdf8',
+                            backgroundColor: 'rgba(56, 189, 248, 0.1)',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            tension: 0.35
+                        },
+                        {
+                            label: 'Đường ngoại suy (nét đứt)',
+                            data: [],
+                            showLine: true,
+                            borderColor: '#64748b',
+                            borderDash: [6, 6],
+                            borderWidth: 2,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Trạng thái hiện tại',
+                            data: [],
+                            backgroundColor: '#f43f5e',
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                            pointRadius: 7,
+                            pointHoverRadius: 9
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: { duration: 150 },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1', font: { family: 'Inter', size: 11 } }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return `(${context.parsed.x.toFixed(1)}, ${context.parsed.y.toFixed(2)})`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            grid: { color: 'rgba(51, 65, 85, 0.6)' },
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: 'Thể tích V (Lít)', color: '#38bdf8', font: { weight: 'bold' } }
+                        },
+                        y: {
+                            grid: { color: 'rgba(51, 65, 85, 0.6)' },
+                            ticks: { color: '#94a3b8' },
+                            title: { display: true, text: 'Áp suất p (atm)', color: '#fbbf24', font: { weight: 'bold' } }
+                        }
+                    }
+                }
+            });
+            updateChartData();
+        }
+
+        function setChartType(type) {
+            state.chartType = type;
+            document.querySelectorAll('.chart-tab').forEach(btn => {
+                btn.className = "chart-tab px-3 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+            });
+            document.getElementById(`chart-btn-${type}`).className = "chart-tab px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white transition";
+            updateChartData();
+        }
+
+        function updateChartData() {
+            if (!physicsChart) return;
+
+            let curvePoints = [];
+            let dashedPoints = [];
+            let currentPoint = [];
+            let xTitle = '', yTitle = '';
+            let xMin = 0, xMax = 60, yMin = 0, yMax = 5;
+            let infoTitle = '', infoDesc = '';
+
+            const tCelsius = state.T - 273;
+
+            if (state.chartType === 'pV') {
+                xTitle = 'Thể tích V (Lít)';
+                yTitle = 'Áp suất p (atm)';
+                xMin = 0; xMax = 55;
+                yMin = 0; yMax = 5.5;
+                currentPoint = [{ x: state.V, y: state.p }];
+
+                if (state.mode === 'isothermal') {
+                    // Hyperbola: p = nRT / V
+                    for (let v = 10; v <= 50; v += 1) {
+                        curvePoints.push({ x: v, y: (MOLES * R_CONST * state.T) / v });
+                    }
+                    infoTitle = 'Đường đẳng nhiệt trong hệ tọa độ $(pOV)$';
+                    infoDesc = 'Đường đẳng nhiệt trong hệ $(pOV)$ là một nhánh của đường <strong>Hyperbol</strong> ($p \\cdot V = \\text{hằng số}$). Khi $V$ tăng thì $p$ giảm và ngược lại.';
+                } else {
+                    // Isobaric: horizontal line p = const
+                    curvePoints = [{ x: 10, y: state.p }, { x: 50, y: state.p }];
+                    infoTitle = 'Đường đẳng áp trong hệ tọa độ $(pOV)$';
+                    infoDesc = 'Trong hệ $(pOV)$, đường đẳng áp là đường thẳng <strong>vuông góc với trục $Op$</strong> (song song trục $OV$) vì áp suất $p$ luôn không đổi.';
+                }
+            } 
+            else if (state.chartType === 'VT') {
+                xTitle = 'Nhiệt độ tuyệt đối T (K)';
+                yTitle = 'Thể tích V (Lít)';
+                xMin = 0; xMax = 650;
+                yMin = 0; yMax = 55;
+                currentPoint = [{ x: state.T, y: state.V }];
+
+                if (state.mode === 'isobaric') {
+                    // V = (nR/p) * T -> straight line through origin (0,0)
+                    const slope = (MOLES * R_CONST) / state.p;
+                    const tStart = Math.max(150, 10 / slope);
+                    const tEnd = Math.min(600, 50 / slope);
+                    curvePoints = [{ x: tStart, y: slope * tStart }, { x: tEnd, y: slope * tEnd }];
+                    dashedPoints = [{ x: 0, y: 0 }, { x: tStart, y: slope * tStart }];
+                    infoTitle = 'Đường đẳng áp trong hệ tọa độ $(VOT)$';
+                    infoDesc = 'Theo định luật Charles ($\\frac{V}{T} = \\text{hằng số}$), đường đẳng áp trong hệ $(VOT)$ là đường thẳng <strong>kéo dài đi qua gốc tọa độ $O$</strong> (nét đứt biểu diễn phần ngoại suy).';
+                } else {
+                    // Isothermal: vertical line T = const
+                    curvePoints = [{ x: state.T, y: 10 }, { x: state.T, y: 50 }];
+                    infoTitle = 'Đường đẳng nhiệt trong hệ tọa độ $(VOT)$';
+                    infoDesc = 'Khi nhiệt độ không đổi (đẳng nhiệt), đồ thị trong hệ $(VOT)$ là đường thẳng <strong>vuông góc với trục $OT$</strong>.';
+                }
+            }
+            else if (state.chartType === 'pt') {
+                xTitle = 'Nhiệt độ Celsius t (°C)';
+                yTitle = 'Áp suất p (atm)';
+                xMin = -300; xMax = 350;
+                yMin = 0; yMax = 5.5;
+                currentPoint = [{ x: tCelsius, y: state.p }];
+
+                if (state.mode === 'isothermal') {
+                    // Vertical line at t = const
+                    curvePoints = [{ x: tCelsius, y: 0.4 }, { x: tCelsius, y: 5.0 }];
+                    infoTitle = 'Đường đẳng nhiệt trong hệ tọa độ $(pOt)$';
+                    infoDesc = 'Trong hệ tọa độ $(pOt)$, quá trình đẳng nhiệt được biểu diễn bằng đường thẳng <strong>song song với trục $Op$</strong> (vuông góc trục $Ot$ tại $t = ' + Math.round(tCelsius) + '^\\circ\\text{C}$).';
+                } else {
+                    // Horizontal line p = const
+                    curvePoints = [{ x: -123, y: state.p }, { x: 327, y: state.p }];
+                    infoTitle = 'Đường đẳng áp trong hệ tọa độ $(pOt)$';
+                    infoDesc = 'Trong hệ tọa độ $(pOt)$, đường đẳng áp là đường thẳng <strong>song song với trục nhiệt độ $Ot$</strong> vì áp suất $p$ không đổi.';
+                }
+            }
+            else if (state.chartType === 'Vt') {
+                xTitle = 'Nhiệt độ Celsius t (°C)';
+                yTitle = 'Thể tích V (Lít)';
+                xMin = -300; xMax = 350;
+                yMin = 0; yMax = 55;
+                currentPoint = [{ x: tCelsius, y: state.V }];
+
+                if (state.mode === 'isobaric') {
+                    // Passes through (-273°C, 0)
+                    const slope = (MOLES * R_CONST) / state.p;
+                    const tStart = Math.max(-123, (10 / slope) - 273);
+                    const tEnd = Math.min(327, (50 / slope) - 273);
+                    curvePoints = [
+                        { x: tStart, y: slope * (tStart + 273) },
+                        { x: tEnd, y: slope * (tEnd + 273) }
+                    ];
+                    dashedPoints = [
+                        { x: -273, y: 0 },
+                        { x: tStart, y: slope * (tStart + 273) }
+                    ];
+                    infoTitle = 'Đường đẳng áp trong hệ tọa độ $(VOt)$';
+                    infoDesc = 'Trong hệ tọa độ Celsius $(VOt)$, đường đẳng áp là đường thẳng cắt trục hoành tại điểm <strong>$t = -273^\\circ\\text{C}$</strong> (độ không tuyệt đối $0\\text{ K}$).';
+                } else {
+                    curvePoints = [{ x: tCelsius, y: 10 }, { x: tCelsius, y: 50 }];
+                    infoTitle = 'Đường đẳng nhiệt trong hệ tọa độ $(VOt)$';
+                    infoDesc = 'Trong hệ tọa độ $(VOt)$, đường đẳng nhiệt là đường thẳng <strong>vuông góc với trục nhiệt độ $Ot$</strong>.';
+                }
+            }
+
+            physicsChart.options.scales.x.title.text = xTitle;
+            physicsChart.options.scales.y.title.text = yTitle;
+            physicsChart.options.scales.x.min = xMin;
+            physicsChart.options.scales.x.max = xMax;
+            physicsChart.options.scales.y.min = yMin;
+            physicsChart.options.scales.y.max = yMax;
+
+            physicsChart.data.datasets[0].data = curvePoints;
+            physicsChart.data.datasets[1].data = dashedPoints;
+            physicsChart.data.datasets[2].data = currentPoint;
+            physicsChart.update();
+
+            document.getElementById('chart-info-title').innerHTML = infoTitle;
+            document.getElementById('chart-info-desc').innerHTML = infoDesc;
+            renderMath();
+        }
+
+        // ==========================================
+        // 4. EDUCATIONAL GAME ENGINE (3 STAGES)
+        // ==========================================
+        let gameState = {
+            started: false,
+            score: 0,
+            timeLeft: 180, // 3 minutes
+            timerInterval: null,
+            mcIndex: 0,
+            mcAnswered: false,
+            stage2Done: false,
+            stage3Done: false
+        };
+
+        const mcQuestions = [
+            {
+                q: "Hệ thức nào sau đây biểu diễn đúng định luật Boyle cho quá trình đẳng nhiệt của một lượng khí xác định?",
+                options: [
+                    "$\\dfrac{p_1}{V_1} = \\dfrac{p_2}{V_2}$",
+                    "$p_1 \\cdot V_1 = p_2 \\cdot V_2$",
+                    "$\\dfrac{V_1}{T_1} = \\dfrac{V_2}{T_2}$",
+                    "$p_1 \\cdot T_1 = p_2 \\cdot T_2$"
+                ],
+                correct: 1,
+                explain: "Định luật Boyle: Ở nhiệt độ không đổi, tích của áp suất và thể tích là một hằng số ($p_1 V_1 = p_2 V_2$)."
+            },
+            {
+                q: "Trong hệ tọa độ $(pOV)$, đường biểu diễn quá trình đẳng nhiệt có dạng là đường gì?",
+                options: [
+                    "Đường thẳng đi qua gốc tọa độ $O$.",
+                    "Đường thẳng song song với trục $OV$.",
+                    "Một nhánh của đường Hyperbol.",
+                    "Đường thẳng vuông góc với trục $OV$."
+                ],
+                correct: 2,
+                explain: "Vì $p$ tỉ lệ nghịch với $V$ ($p = \\frac{\\text{hằng số}}{V}$) nên đồ thị $p(V)$ là một nhánh của đường Hyperbol."
+            },
+            {
+                q: "Nén đẳng nhiệt một khối khí từ thể tích $12\\text{ lít}$ xuống còn $4\\text{ lít}$ thì áp suất của khối khí thay đổi như thế nào?",
+                options: [
+                    "Tăng lên $3$ lần.",
+                    "Giảm đi $3$ lần.",
+                    "Tăng lên $4$ lần.",
+                    "Không thay đổi."
+                ],
+                correct: 0,
+                explain: "Thể tích giảm $3$ lần (từ $12\\text{ L}$ xuống $4\\text{ L}$) nên theo định luật Boyle, áp suất tăng lên $3$ lần."
+            },
+            {
+                q: "Trong quá trình đẳng áp của một lượng khí xác định, nếu nhiệt độ tuyệt đối $T$ tăng gấp đôi thì thể tích của khí sẽ:",
+                options: [
+                    "Giảm đi một nửa.",
+                    "Tăng lên $4$ lần.",
+                    "Tăng gấp đôi.",
+                    "Không đổi."
+                ],
+                correct: 2,
+                explain: "Theo định luật Charles ($\\frac{V}{T} = \\text{const}$), thể tích $V$ tỉ lệ thuận với nhiệt độ tuyệt đối $T$."
+            }
+        ];
+
+        const dndData = [
+            { id: 'item-1', text: 'Nhánh đường Hyperbol', target: 'zone-1', label: 'Đường đẳng nhiệt trong hệ $(pOV)$' },
+            { id: 'item-2', text: 'Đường thẳng qua gốc $O$', target: 'zone-2', label: 'Đường đẳng áp trong hệ $(VOT)$' },
+            { id: 'item-3', text: 'Cắt trục hoành tại $-273^\\circ\\text{C}$', target: 'zone-3', label: 'Đường đẳng áp trong hệ $(VOt)$' }
+        ];
+
+        let selectedCardId = null;
+        let userMatches = {};
+
+        function initGame() {
+            clearInterval(gameState.timerInterval);
+            gameState = {
+                started: true,
+                score: 0,
+                timeLeft: 180,
+                timerInterval: null,
+                mcIndex: 0,
+                mcAnswered: false,
+                stage2Done: false,
+                stage3Done: false
+            };
+            userMatches = {};
+            selectedCardId = null;
+
+            document.getElementById('game-score').innerText = "0 / 100";
+            document.getElementById('game-summary').classList.add('hidden');
+            
+            // Reset Stage 3 inputs
+            document.getElementById('blank-1').value = "";
+            document.getElementById('blank-2').value = "";
+            document.getElementById('blank-3').value = "";
+            document.getElementById('blank-feedback').innerText = "";
+            document.getElementById('blank-check-btn').disabled = false;
+            document.getElementById('blank-check-btn').classList.remove('opacity-50');
+
+            // Reset Stage 2
+            document.getElementById('dnd-feedback').innerText = "";
+            document.getElementById('dnd-check-btn').disabled = false;
+            document.getElementById('dnd-check-btn').classList.remove('opacity-50');
+
+            switchGameStage(1);
+            renderMCQuestion();
+            renderDragAndDrop();
+            startTimer();
+        }
+
+        function startTimer() {
+            const timerEl = document.getElementById('game-timer');
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                const mins = String(Math.floor(gameState.timeLeft / 60)).padStart(2, '0');
+                const secs = String(gameState.timeLeft % 60).padStart(2, '0');
+                timerEl.innerText = `${mins}:${secs}`;
+
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    finishGame("Hết giờ làm bài!");
+                }
+            }, 1000);
+        }
+
+        function addScore(pts) {
+            gameState.score += pts;
+            document.getElementById('game-score').innerText = `${gameState.score} / 100`;
+        }
+
+        function switchGameStage(stageNum) {
+            for (let i = 1; i <= 3; i++) {
+                const panel = document.getElementById(`game-stage-${i}`);
+                const btn = document.getElementById(`stage-btn-${i}`);
+                if (i === stageNum) {
+                    panel.classList.remove('hidden');
+                    btn.className = "stage-btn p-3 rounded-xl border-2 border-cyan-500 bg-slate-800 text-left transition";
+                } else {
+                    panel.classList.add('hidden');
+                    btn.className = "stage-btn p-3 rounded-xl border border-slate-700 bg-slate-800/60 text-left transition opacity-80 hover:opacity-100";
+                }
+            }
+        }
+
+        // --- Stage 1: Multiple Choice ---
+        function renderMCQuestion() {
+            gameState.mcAnswered = false;
+            const qObj = mcQuestions[gameState.mcIndex];
+            document.getElementById('mc-current').innerText = gameState.mcIndex + 1;
+            document.getElementById('mc-question').innerText = qObj.q;
+            document.getElementById('mc-feedback').classList.add('hidden');
+            document.getElementById('mc-next-btn').classList.add('hidden');
+
+            const optContainer = document.getElementById('mc-options');
+            optContainer.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+            qObj.options.forEach((opt, idx) => {
+                const btn = document.createElement('button');
+                btn.className = "mc-opt-btn text-left p-4 rounded-xl bg-slate-900 hover:bg-slate-700/80 border border-slate-700 transition flex items-center gap-3 text-sm sm:text-base font-medium";
+                btn.innerHTML = `<span class="w-7 h-7 rounded-lg bg-slate-800 border border-slate-600 flex items-center justify-center font-bold text-cyan-400 shrink-0">${letters[idx]}</span> <span>${opt}</span>`;
+                btn.onclick = () => selectMCOption(idx, btn);
+                optContainer.appendChild(btn);
+            });
+            renderMath();
+        }
+
+        function selectMCOption(idx, btnEl) {
+            if (gameState.mcAnswered) return;
+            gameState.mcAnswered = true;
+
+            const qObj = mcQuestions[gameState.mcIndex];
+            const allBtns = document.querySelectorAll('.mc-opt-btn');
+            const feedback = document.getElementById('mc-feedback');
+
+            if (idx === qObj.correct) {
+                btnEl.classList.remove('bg-slate-900', 'border-slate-700');
+                btnEl.classList.add('bg-emerald-900/60', 'border-emerald-500', 'text-emerald-200');
+                feedback.className = "p-3.5 rounded-xl text-sm font-medium mb-4 bg-emerald-950/80 border border-emerald-600 text-emerald-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-check mr-1.5"></i> Chính xác (+10đ)! ${qObj.explain}`;
+                addScore(10);
+            } else {
+                btnEl.classList.remove('bg-slate-900', 'border-slate-700');
+                btnEl.classList.add('bg-rose-900/60', 'border-rose-500', 'text-rose-200');
+                allBtns[qObj.correct].classList.add('bg-emerald-900/60', 'border-emerald-500');
+                feedback.className = "p-3.5 rounded-xl text-sm font-medium mb-4 bg-rose-950/80 border border-rose-600 text-rose-300";
+                feedback.innerHTML = `<i class="fa-solid fa-circle-xmark mr-1.5"></i> Chưa chính xác! ${qObj.explain}`;
+            }
+
+            feedback.classList.remove('hidden');
+            const nextBtn = document.getElementById('mc-next-btn');
+            nextBtn.classList.remove('hidden');
+            if (gameState.mcIndex === mcQuestions.length - 1) {
+                nextBtn.innerHTML = `Sang Vòng 2 <i class="fa-solid fa-arrow-right ml-1.5"></i>`;
+            } else {
+                nextBtn.innerHTML = `Câu tiếp theo <i class="fa-solid fa-arrow-right ml-1.5"></i>`;
+            }
+            renderMath();
+        }
+
+        function nextMCQuestion() {
+            if (gameState.mcIndex < mcQuestions.length - 1) {
+                gameState.mcIndex++;
+                renderMCQuestion();
+            } else {
+                switchGameStage(2);
+            }
+        }
+
+        // --- Stage 2: Drag & Drop + Touch/Click Friendly ---
+        function renderDragAndDrop() {
+            const dragContainer = document.getElementById('drag-items-container');
+            const dropContainer = document.getElementById('drop-zones-container');
+            dragContainer.innerHTML = '';
+            dropContainer.innerHTML = '';
+
+            // Shuffle items
+            const shuffledItems = [...dndData].sort(() => Math.random() - 0.5);
+
+            shuffledItems.forEach(item => {
+                const card = document.createElement('div');
+                card.id = item.id;
+                card.draggable = true;
+                card.className = "draggable-item cursor-grab active:cursor-grabbing p-3.5 rounded-xl bg-cyan-950/60 border border-cyan-500/50 text-cyan-200 font-semibold text-sm flex items-center justify-between shadow hover:bg-cyan-900/60 transition";
+                card.innerHTML = `<span><i class="fa-solid fa-grip-vertical text-cyan-500 mr-2"></i>${item.text}</span>`;
+                
+                // Desktop Drag Events
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', item.id);
+                    selectedCardId = item.id;
+                });
+
+                // Mobile/Click Selection Event
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('ring-2', 'ring-amber-400'));
+                    card.classList.add('ring-2', 'ring-amber-400');
+                    selectedCardId = item.id;
+                });
+
+                dragContainer.appendChild(card);
+            });
+
+            dndData.forEach(zone => {
+                const dropBox = document.createElement('div');
+                dropBox.id = zone.target;
+                dropBox.className = "drop-zone p-3.5 rounded-xl bg-slate-900 border-2 border-dashed border-slate-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 transition cursor-pointer";
+                dropBox.innerHTML = `
+                    <span class="text-sm font-medium text-slate-300">${zone.label}</span>
+                    <span id="slot-${zone.target}" class="text-xs px-3 py-1.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700 font-semibold text-center">
+                        Thả thẻ vào đây
+                    </span>
+                `;
+
+                dropBox.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropBox.classList.add('drag-over');
+                });
+                dropBox.addEventListener('dragleave', () => {
+                    dropBox.classList.remove('drag-over');
+                });
+                dropBox.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    dropBox.classList.remove('drag-over');
+                    const cardId = e.dataTransfer.getData('text/plain') || selectedCardId;
+                    if (cardId) assignCardToZone(cardId, zone.target);
+                });
+
+                // Click to place for mobile users
+                dropBox.addEventListener('click', () => {
+                    if (selectedCardId) {
+                        assignCardToZone(selectedCardId, zone.target);
+                        document.querySelectorAll('.draggable-item').forEach(el => el.classList.remove('ring-2', 'ring-amber-400'));
+                        selectedCardId = null;
+                    }
+                });
+
+                dropContainer.appendChild(dropBox);
+            });
+            renderMath();
+        }
+
+        function assignCardToZone(cardId, zoneId) {
+            if (gameState.stage2Done) return;
+            const itemObj = dndData.find(d => d.id === cardId);
+            if (!itemObj) return;
+
+            userMatches[zoneId] = cardId;
+            const slotEl = document.getElementById(`slot-${zoneId}`);
+            slotEl.innerHTML = itemObj.text;
+            slotEl.className = "text-xs px-3 py-1.5 rounded-lg bg-cyan-600 text-white font-bold text-center shadow";
+            renderMath();
+        }
+
+        function checkDragAndDrop() {
+            if (gameState.stage2Done) return;
+            let correctCount = 0;
+
+            dndData.forEach(zone => {
+                const slotEl = document.getElementById(`slot-${zone.target}`);
+                if (userMatches[zone.target] === zone.id) {
+                    correctCount++;
+                    slotEl.className = "text-xs px-3 py-1.5 rounded-lg bg-emerald-600 text-white font-bold text-center";
+                } else {
+                    slotEl.className = "text-xs px-3 py-1.5 rounded-lg bg-rose-600 text-white font-bold text-center";
+                }
+            });
+
+            const pts = correctCount * 10;
+            addScore(pts);
+            gameState.stage2Done = true;
+
+            const btn = document.getElementById('dnd-check-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            const fb = document.getElementById('dnd-feedback');
+            fb.innerHTML = `<span class="text-emerald-400">Bạn ghép đúng ${correctCount}/3 cặp (+${pts} điểm).</span> <button onclick="switchGameStage(3)" class="underline text-cyan-400 ml-2">Sang Vòng 3 &rarr;</button>`;
+        }
+
+        // --- Stage 3: Fill in the Blanks ---
+        function checkFillBlanks() {
+            if (gameState.stage3Done) return;
+            const b1 = document.getElementById('blank-1').value;
+            const b2 = document.getElementById('blank-2').value;
+            const b3 = parseFloat(document.getElementById('blank-3').value);
+
+            let correct = 0;
+            if (b1 === 'nghich') correct++;
+            if (b2 === 'gốc tọa độ') correct++;
+            // T1 = 27 + 273 = 300K, V1 = 10L. T2 = 600K => V2 = 20L
+            if (b3 === 20) correct++;
+
+            const pts = correct * 10;
+            addScore(pts);
+            gameState.stage3Done = true;
+
+            const btn = document.getElementById('blank-check-btn');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            document.getElementById('blank-feedback').innerHTML = `<span class="text-emerald-400">Đúng ${correct}/3 chỗ trống (+${pts} điểm)! Đáp án: tỉ lệ nghịch | gốc tọa độ O | 20 lít.</span>`;
+
+            clearInterval(gameState.timerInterval);
+            finishGame("Chúc mừng bạn đã hoàn thành cả 3 vòng thử thách!");
+        }
+
+        function finishGame(titleMsg) {
+            const summary = document.getElementById('game-summary');
+            summary.classList.remove('hidden');
+            summary.querySelector('h3').innerText = titleMsg;
+            document.getElementById('summary-text').innerText = `Tổng điểm đạt được: ${gameState.score} / 100 điểm. Thời gian còn lại: ${document.getElementById('game-timer').innerText}.`;
+        }
+
+        // ==========================================
+        // 5. INITIALIZATION ON WINDOW LOAD
+        // ==========================================
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('view-sim').classList.contains('hidden')) {
+                resizeGasCanvas();
+            }
+        });
+
+        window.onload = function () {
+            resizeGasCanvas();
+            initParticles();
+            initChart();
+            setProcessMode('isothermal');
+            animateGas();
+            renderMath();
+        };
+    </script>
+</body>
+</html>
